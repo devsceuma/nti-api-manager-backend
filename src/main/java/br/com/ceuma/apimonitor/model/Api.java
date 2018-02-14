@@ -1,9 +1,8 @@
-package br.com.ceuma.apimonitor;
+package br.com.ceuma.apimonitor.model;
 
+import br.com.ceuma.apimonitor.model.Servidor;
 import lombok.Data;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.LinkedHashMap;
 
 public @Data class Api {

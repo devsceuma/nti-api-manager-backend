@@ -1,5 +1,7 @@
 package br.com.ceuma.apimonitor;
 
+import br.com.ceuma.apimonitor.model.Api;
+import br.com.ceuma.apimonitor.model.Servidor;
 import com.google.firebase.database.*;
 import org.springframework.web.client.RestTemplate;
 

@@ -1,4 +1,4 @@
-package br.com.ceuma.apimonitor;
+package br.com.ceuma.apimonitor.model;
 
 import lombok.Data;
 
