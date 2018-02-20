@@ -1,5 +1,6 @@
 package br.com.ceuma.apimonitor.model;
 
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public @Data class Servidor {
     private String nome;
     private List<Api> apis = new ArrayList<Api>();
 
-    public Servidor(String key, LinkedHashMap<String, Object> params){
+    public Servidor(String key, Map<String, Object> params){
         this.codigo = key;
         this.nome = params.get("nome").toString();
         this.endereco = params.get("endereco").toString();

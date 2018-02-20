@@ -4,6 +4,7 @@ import br.com.ceuma.apimonitor.model.Servidor;
 import lombok.Data;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public @Data class Api {
 
@@ -16,7 +17,7 @@ public @Data class Api {
     private String ultimaVerificacao;
     private String versao;
 
-    public Api(String codigo, LinkedHashMap<String, Object> params){
+    public Api(String codigo, Map<String, Object> params){
         this.codigo = codigo;
         this.contextPath = params.get("contextPath").toString();
         this.nome = params.get("nome").toString();

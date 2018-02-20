@@ -1,8 +1,13 @@
 package br.com.ceuma.apimonitor;
 
 import br.com.ceuma.apimonitor.model.Api;
+import br.com.ceuma.apimonitor.model.RestTemplateBuilder;
 import br.com.ceuma.apimonitor.model.Servidor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.database.*;
+import com.google.firebase.tasks.Task;
+import com.google.firebase.tasks.Tasks;
+import com.google.gson.internal.LinkedTreeMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
@@ -21,14 +26,16 @@ public class Refresher extends TimerTask {
 
 
     private void refresh() throws ExecutionException, InterruptedException {
+        System.out.println("CARREGANDO SERVIDORES");
         List<Servidor> servidores = new ArrayList<>();
-        Object restTemplate = new RestTemplate().getForObject("https://api-manager-42907.firebaseio.com/servidores.json", Object.class);
+        Object restTemplate = new RestTemplateBuilder().build().getForObject("https://api-manager-42907.firebaseio.com/servidores.json", Object.class);
         Map<String, Object> response = (LinkedHashMap) restTemplate;
 
         for (Map.Entry<String, Object> o : response.entrySet()) {
             servidores.add(new Servidor(o.getKey(), (LinkedHashMap<String, Object>) o.getValue()));
         }
 
+        System.out.println(String.format("%d SERVIDORES CARREGADOS", servidores.size()));
         pingInServers(servidores);
 
     }
@@ -38,6 +45,7 @@ public class Refresher extends TimerTask {
         for (Servidor s: servidores) {
             s.getApis().stream().forEach(e -> {
                 try {
+                    System.out.println(String.format("VERIFICANDO API: %s", e.getNome()));
                     e.setOnline(isOnline(e.getHost(s)));
                     e.setUltimaVerificacao(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
                     update(s,e);
@@ -53,9 +61,12 @@ public class Refresher extends TimerTask {
     }
 
     private void update(Servidor s, Api api) throws ExecutionException, InterruptedException {
-        Map<String, Object> apiMap = new HashMap<>();
-        apiMap.put(api.getCodigo(), api);
-        firebaseDatabase.getReference().child("servidores/"+s.getCodigo()+"/apis/").updateChildrenAsync(apiMap).get();
+        System.out.println(String.format("ATUALIZANDO API: %s", api.getNome()));
+        Map<String, Object> apiMap = new ObjectMapper().convertValue(api, Map.class);
+
+        Task<Void> voidTask = firebaseDatabase.getReference().child("servidores/" + s.getCodigo() + "/apis/").updateChildren(apiMap);
+        Tasks.await(voidTask);
+        System.out.println(String.format("API: %s ATUALIZADA", api.getNome()));
     }
 
     private Boolean isOnline(String host) throws IOException, InterruptedException {
@@ -71,8 +82,10 @@ public class Refresher extends TimerTask {
                 return true;
         }
 
-        if(line == null || line.equals(""))
+        if(line == null || line.equals("")) {
+            System.out.println("API ESTÁ OFFLINE");
             return false;
+        }
 
         return false;
     }
